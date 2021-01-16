@@ -16,7 +16,7 @@ BLUE = (0, 0, 255)
 
 
 FPS = 60
-step = 50
+
 
 PLATFORM_WIDTH = 32
 PLATFORM_HEIGHT = 32
@@ -24,7 +24,7 @@ PLATFORM_HEIGHT = 32
 pygame.init()
 pygame.mixer.init()
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("Good COCK")
+pygame.display.set_caption("Good")
 clock = pygame.time.Clock()
 
 screen.fill(BLACK)
@@ -34,10 +34,10 @@ level = [
        "-------------------------------",
        "-                             -",
        "-                             -",
-       "-                             -",
+       "-                ----         -",
        "-            --               -",
        "-                             -",
-       "--                            -",
+       "--    --                      -",
        "-                             -",
        "-                   ---       -",
        "-                             -",
@@ -50,7 +50,7 @@ level = [
        "-                   --        -",
        "-                             -",
        "-                             -",
-       "-                             -",
+       "-    ---                      -",
        "-                             -",
        "-------------------------------"]
 
@@ -86,17 +86,17 @@ class Player(sprite.Sprite):
 
     def update(self, left, right):
         if left:
-            self.xvel = -MOVE_SPEED  # Лево = x- n
+            self.xvel = -MOVE_SPEED
 
         if right:
-            self.xvel = MOVE_SPEED  # Право = x + n
+            self.xvel = MOVE_SPEED
 
-        if not (left or right):  # стоим, когда нет указаний идти
+        if not (left or right):
             self.xvel = 0
 
-        self.rect.x += self.xvel  # переносим свои положение на xvel
+        self.rect.x += self.xvel
 
-    def draw(self, screen):  # Выводим себя на экран
+    def draw(self, screen):
         screen.blit(self.image, (self.rect.x, self.rect.y))
 
 hero = Player(55, 55)
@@ -121,8 +121,7 @@ while running:
             right = False
         elif event.type == KEYUP and event.key == K_LEFT:
             left = False
-    hero.update(left, right)  # передвижение
-      # отображение
+    hero.update(left, right)
     display.update()
 
 pygame.quit()
