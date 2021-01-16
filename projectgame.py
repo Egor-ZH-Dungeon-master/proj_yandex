@@ -1,139 +1,78 @@
 import pygame
+from pygame import *
 import sys
 import os
 
-FPS = 75
 WIDTH = 1000
 HEIGHT = 700
-STEP = 50
+DISPLAY = (WIDTH, HEIGHT)
+
+
+BLACK = (0, 0, 0)
+WHITE = (255, 255, 255)
+RED = (255, 0, 0)
+GREEN = (0, 255, 0)
+BLUE = (0, 0, 255)
+
+
+FPS = 60
+
+
+PLATFORM_WIDTH = 32
+PLATFORM_HEIGHT = 32
 
 pygame.init()
-
+pygame.mixer.init()
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
+pygame.display.set_caption("Good COCK")
 clock = pygame.time.Clock()
 
+screen.fill(BLACK)
+pygame.display.flip()
 
-def load_image(name):
-    fullname = os.path.join('data', name)
-    try:
-        image = pygame.image.load(fullname)
-        return image
-    except:
-        print(f"Файл с изображением '{fullname}' не найден")
-        sys.exit()
+level = [
+       "-------------------------",
+       "-                       -",
+       "-                       -",
+       "-                       -",
+       "-            --         -",
+       "-                       -",
+       "--                      -",
+       "-                       -",
+       "-                   --- -",
+       "-                       -",
+       "-                       -",
+       "-      ---              -",
+       "-                       -",
+       "-   -----------        -",
+       "-                       -",
+       "-                -      -",
+       "-                   --  -",
+       "-                       -",
+       "-                       -",
+       "-------------------------"]
 
+x = y = 0  # координаты
+for row in level:  # вся строка
+    for col in row:  # каждый символ
+        if col == "-":
+            # создаем блок, заливаем его цветом и рисеум его
+            pf = Surface((PLATFORM_WIDTH, PLATFORM_HEIGHT))
+            pf.fill(WHITE)
+            screen.blit(pf, (x, y))
+            display.update()
 
-def terminate():
-    pygame.quit()
-    sys.exit()
-
-
-def start_screen():
-    intro_text = ["ЗАСТАВКА", "",
-                  "Правила игры",
-                  "ходить там, где нет коробочек"]
-
-    fon = pygame.transform.scale(load_image('fon.jpg'), (WIDTH, HEIGHT))
-    screen.blit(fon, (0, 0))
-    font = pygame.font.Font(None, 30)
-    text_coord = 50
-    for line in intro_text:
-        string_rendered = font.render(line, 1, pygame.Color('red'))
-        intro_rect = string_rendered.get_rect()
-        text_coord += 10
-        intro_rect.top = text_coord
-        intro_rect.x = 10
-        text_coord += intro_rect.height
-        screen.blit(string_rendered, intro_rect)
-
-    while True:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                terminate()
-            elif event.type == pygame.KEYDOWN or \
-                    event.type == pygame.MOUSEBUTTONDOWN:
-                return
-        pygame.display.flip()
-        clock.tick(FPS)
+        x += PLATFORM_WIDTH  # блоки платформы ставятся на ширине блоков
+    y += PLATFORM_HEIGHT  # то же самое и с высотой
+    x = 0  # на каждой новой строчке начинаем с нуля
 
 
-def load_level(filename):
-    filename = "data/" + filename
-    with open(filename, 'r') as mapFile:
-        level_map = [line.strip() for line in mapFile]
 
-    max_width = max(map(len, level_map))
-
-    return list(map(lambda x: x.ljust(max_width, '.'), level_map))
-
-
-tile_images = {
-    'wall': load_image('stena1.jpg'),
-    'empty': load_image('pol.png')
-}
-player_image = load_image('hero1.png')
-
-tile_width = tile_height = 50
-
-
-class Tile(pygame.sprite.Sprite):
-    def __init__(self, tile_type, pos_x, pos_y):
-        super().__init__(tiles_group, all_sprites)
-        self.image = tile_images[tile_type]
-        self.rect = self.image.get_rect().move(
-            tile_width * pos_x, tile_height * pos_y)
-
-
-class Player(pygame.sprite.Sprite):
-    def __init__(self, pos_x, pos_y):
-        super().__init__(player_group, all_sprites)
-        self.image = player_image
-        self.rect = self.image.get_rect().move(
-            tile_width * pos_x + 15, tile_height * pos_y + 5)
-
-
-player = None
-
-# группы спрайтов
-all_sprites = pygame.sprite.Group()
-tiles_group = pygame.sprite.Group()
-player_group = pygame.sprite.Group()
-
-
-def generate_level(level):
-    new_player, x, y = None, None, None
-    for y in range(len(level)):
-        for x in range(len(level[y])):
-            if level[y][x] == '.':
-                Tile('empty', x, y)
-            elif level[y][x] == '#':
-                Tile('wall', x, y)
-            elif level[y][x] == '@':
-                Tile('empty', x, y)
-                new_player = Player(x, y)
-    return new_player, x, y
-
-
-player, level_x, level_y = generate_level(load_level('map.txt'))
-start_screen()
 
 running = True
-
 while running:
+    clock.tick(FPS)
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-        elif event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_UP:
-                player.rect.y -= STEP
-            if event.key == pygame.K_DOWN:
-                player.rect.y += STEP
-            if event.key == pygame.K_RIGHT:
-                player.rect.x += STEP
-            if event.key == pygame.K_LEFT:
-                player.rect.x -= STEP
-    clock.tick(FPS)
-    screen.fill(pygame.Color('black'))
-    tiles_group.draw(screen)
-    player_group.draw(screen)
-    pygame.display.flip()
+pygame.quit()
