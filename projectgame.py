@@ -11,7 +11,7 @@ all_sprites = pygame.sprite.Group()
 tiles_group = pygame.sprite.Group()
 player_group = pygame.sprite.Group()
 perehod = pygame.mixer.Sound('data/perehod.wav')
-
+pygame.display.set_caption("Подземелье лягушек")
 
 def terminate():
     pygame.quit()
