@@ -10,6 +10,7 @@ clock = pygame.time.Clock()
 all_sprites = pygame.sprite.Group()
 tiles_group = pygame.sprite.Group()
 player_group = pygame.sprite.Group()
+perehod = pygame.mixer.Sound('data/perehod.wav')
 
 
 def terminate():
@@ -49,6 +50,8 @@ def start_screen():
                 terminate()
             elif event.type == pygame.KEYDOWN or \
                     event.type == pygame.MOUSEBUTTONDOWN:
+                pygame.mixer.Sound.play(perehod)
+
                 return  # начинаем игру
         pygame.display.flip()
         clock.tick(FPS)
@@ -106,6 +109,10 @@ tile_images = {
     'muxa': load_image("mukha.png")
 }
 
+wall_img = pygame.image.load("data/stena.png")
+
+empty_img = pygame.image.load('data/pol.png')
+muxa_img = pygame.image.load('data/mukha.png')
 
 player_image = load_image('heros.png')
 
@@ -114,6 +121,7 @@ tile_width = tile_height = 50
 
 def move_hero(hero, movement):
     x, y = hero.pos
+
     if movement == "up":
         if y > 0 and level[y - 1][x] == "." or y > 0 and level[y - 1][x] == "p":
             hero.move(x, y - 1)
@@ -126,6 +134,8 @@ def move_hero(hero, movement):
     elif movement == "right":
         if x < level_x - 1 and level[y][x + 1] == "." or x < level_x - 1 and level[y][x + 1] == "p":
             hero.move(x + 1, y)
+
+
 
 
 class Tile(pygame.sprite.Sprite):
@@ -146,6 +156,7 @@ class Player(pygame.sprite.Sprite):
 
     def move(self, x, y):
         self.pos = (x, y)
+        global pos
         self.rect = self.image.get_rect().move(
             tile_width * self.pos[0] + 15, tile_height * self.pos[1] + 5)
 
@@ -155,6 +166,7 @@ if __name__ == '__main__':
     player = None
     level = load_level('map.txt')
     player, level_x, level_y = generate_level(level)
+
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -168,7 +180,6 @@ if __name__ == '__main__':
                     move_hero(player, 'up')
                 if event.key == pygame.K_DOWN:
                     move_hero(player, 'down')
-
                 screen.fill(pygame.Color('black'))
         tiles_group.draw(screen)
         player_group.draw(screen)
