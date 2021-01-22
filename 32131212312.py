@@ -223,6 +223,7 @@ def d_lyag():
 
 
 def check_colid(barier):
+    pass
 
 
 game_1()
