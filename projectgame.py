@@ -486,3 +486,4 @@ while game_1():
 
 pygame.quit()
 quit()
+
