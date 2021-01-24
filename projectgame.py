@@ -100,6 +100,7 @@ class Object:
             self.x -= self.speed
             return True
         else:
+
             return False
 
     def ret_self(self, rad, y, width, image):
@@ -301,5 +302,3 @@ def move_ob(stone, cloud):
         choice = random.randrange(0, 2)
         im_c = cloud_im[choice]
         cloud.ret_self(WIDTH, random.randrange(10, 200), cloud.width, im_c)
-
-
