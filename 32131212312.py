@@ -83,8 +83,6 @@ cac_x = WIDTH - 40
 cac_y = HEIGHT - cac_HEIGHT - 80
 
 
-
-
 def game_1():
     global m_jump
     game = True
@@ -104,8 +102,14 @@ def game_1():
         if keys[pygame.K_SPACE] or keys[pygame.K_w] or keys[pygame.K_UP]:
             m_jump = True
 
+        if keys[pygame.K_ESCAPE] or keys[pygame.K_PAUSE]:
+            pause()
+
         if m_jump:
             jump()
+
+        if check_colid(cac_array):
+            game = False
 
         display.blit(land, (0, 0))
         draw_array(cac_array)
@@ -115,6 +119,7 @@ def game_1():
 
         pygame.display.update()
         clock.tick(fps)
+    return u_game_over()
 
 
 def jump():
@@ -190,6 +195,7 @@ def open_r():
 
     return cloud, stone
 
+
 def move_ob(stone, cloud):
     check = stone.move()
     if not check:
@@ -213,17 +219,62 @@ def d_lyag():
     im_counter += 1
 
 
+def p_text(soobsh, x, y, sh_color=(0, 255, 0), sh_type="data/shrift.ttf", sh_size=35):
+    sh_type = pygame.font.Font(sh_type, sh_size)
+    text = sh_type.render(soobsh, True, sh_color)
+    display.blit(text, (x, y))
 
 
+def pause():
+    paused = True
+    while paused:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                quit()
+
+        p_text("ИГРА ОСТАНОВЛЕНА, ЧТОБЫ ПРОДОЛЖИТЬ НАЖМИ НА ЕНТЕР", 50, 300)
+
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_RETURN]:
+            paused = False
+
+        pygame.display.update()
+        clock.tick(20)
 
 
+def check_colid(bariers):
+    for barier in bariers:
+        if user_y + user_HEIGHT >= barier.y:
+            if barier.x <= user_x <= barier.x + barier.width:
+                return True
+            elif barier.x <= user_x + user_WIDTH <= barier.x + barier.width:
+                return True
+    return False
 
 
+def u_game_over():
+    stopped = True
+    while stopped:
+        for event in pygame.event.get():
+            if event. type == pygame.QUIT:
+                pygame.quit()
+                quit()
+
+        p_text("ТЫ ПРОИГРАЛ, НИКЧЁМНЫЙ ЛЮДИШКА, Я НЕ УДИВЛЁН", 100, 300)
+
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_RETURN]:
+            return True
+
+        if keys[pygame.K_ESCAPE]:
+            return False
+
+        pygame.display.update()
+        clock.tick(15)
 
 
-
-def check_colid(barier):
+while game_1():
     pass
-
-
-game_1()
+pygame.quit()
+quit()
