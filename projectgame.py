@@ -23,6 +23,7 @@ prizemzv = pygame.mixer.Sound('data/priz.wav')
 poterserd = pygame.mixer.Sound('data/serdmin.wav')
 proigral = pygame.mixer.Sound('data/proigral.wav')
 plusserd = pygame.mixer.Sound('data/plusserd.wav')
+click = pygame.mixer.Sound('data/click.wav')
 
 # иконка игры
 ikonka = pygame.image.load("data/lyag0.png")
@@ -77,6 +78,33 @@ class Object:
         display.blit(self.image, (self.x, self.y))
 
 
+class Button:
+    def __init__(self, width, height):
+        self.width = width
+        self.height = height
+        self.active_clr = (0, 200, 0)
+        self.noactive_clr = (0, 100, 0)
+
+    def draw(self, x, y, message, action=None):
+        mouse = pygame.mouse.get_pos()
+        clicknul = pygame.mouse.get_pressed()
+
+        if x < mouse[0] < x + self.width:
+            if y < mouse[1] < y + self.height:
+                pygame.draw.rect(display, self.active_clr, (x, y, self.width, self.height))
+                if clicknul[0] == 1:
+                    pygame.mixer.Sound.play(click)
+                    pygame.time.delay(300)
+                    if action is not None:
+                        action()
+        else:
+            pygame.draw.rect(display, self.noactive_clr, (x, y, self.width, self.height))
+
+        p_text(message, x + 10, x + 60)
+
+
+
+
 user_WIDTH = 50
 user_HEIGHT = 50
 
@@ -88,7 +116,7 @@ m_jump = False
 c_jump = 30
 
 # размеры препятствия
-cac_WIDTH = 20
+cac_WIDTH = 25
 cac_HEIGHT = 80
 
 # положение препятствия
@@ -106,7 +134,9 @@ def game_1():
     land = pygame.image.load("data/Land.png")
 
     stone, cloud = open_r()
-    heart = Object(WIDTH, 450, 30, health_im, 4)
+    heart = Object(WIDTH, 460, 30, health_im, 4)
+
+    button = Button(100, 50)
 
     while game:
         for event in pygame.event.get():
@@ -131,6 +161,7 @@ def game_1():
 
         display.blit(land, (0, 0))
         p_text("Score: " + str(scores), 800, 10)
+        button.draw(50, 100, 'wow')
         heart.move()
         plus_h(heart)
         show_health()
@@ -228,7 +259,7 @@ def open_r():
     im_c = cloud_im[choice]
 
     stone = Object(WIDTH, HEIGHT - 80, 10, im_s, 5)
-    cloud = Object(WIDTH, 80, 73, im_c, 3)
+    cloud = Object(WIDTH, 80, 80, im_c, 3)
 
     return cloud, stone
 
@@ -416,6 +447,9 @@ def plus_h(heart):
 
         radius = WIDTH + random.randrange(500, 1700)
         heart.ret_self(radius, heart.y, heart.width, heart.image)
+
+
+
 
 
 while game_1():
