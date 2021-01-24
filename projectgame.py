@@ -302,3 +302,99 @@ def move_ob(stone, cloud):
         choice = random.randrange(0, 2)
         im_c = cloud_im[choice]
         cloud.ret_self(WIDTH, random.randrange(10, 200), cloud.width, im_c)
+
+
+def d_lyag():
+    global im_counter
+    if im_counter == 18:
+        im_counter = 0
+
+    display.blit(pers_im[im_counter // 6], (user_x, user_y))
+    im_counter += 1
+
+
+def p_text(soobsh, x, y, sh_color=(0, 250, 0), sh_type="data/shrift.ttf", sh_size=35):
+    sh_type = pygame.font.Font(sh_type, sh_size)
+    text = sh_type.render(soobsh, True, sh_color)
+    display.blit(text, (x, y))
+
+
+def pause():
+    paused = True
+    pygame.mixer.music.pause()
+    while paused:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                quit()
+
+        p_text("ИГРА ОСТАНОВЛЕНА, ЧТОБЫ ПРОДОЛЖИТЬ НАЖМИ НА ENTER", 50, 300)
+
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_RETURN]:
+            paused = False
+
+        pygame.display.update()
+        clock.tick(20)
+    pygame.mixer.music.unpause()
+
+
+def check_colid(bariers):
+    for barier in bariers:
+        if barier.y == 449:
+            if not m_jump:
+                if barier.x <= user_x + user_WIDTH - 35 <= barier.x + barier.width:
+                    if check_h():
+                        obj_return(bariers, barier)
+                        return False
+                    else:
+                        return True
+            elif c_jump >= 0:
+                if user_y + user_HEIGHT - 5 >= barier.y:
+                    if barier.x <= user_x + user_WIDTH - 40 <= barier.x + barier.width:
+                        if check_h():
+                            obj_return(bariers, barier)
+                            return False
+                        else:
+                            return True
+            else:
+                if user_y + user_HEIGHT - 10 >= barier.y:
+                    if check_h():
+                        obj_return(bariers, barier)
+                        return False
+                    else:
+                        return True
+        else:
+            if not m_jump:
+                if barier.x <= user_x + user_WIDTH - 5 <= barier.x + barier.width:
+                    if check_h():
+                        obj_return(bariers, barier)
+                        return False
+                    else:
+                        return True
+            elif c_jump == 10:
+                if user_y + user_HEIGHT - 5 >= barier.y:
+                    if barier.x <= user_x + user_WIDTH - 5 <= barier.x + barier.width:
+                        if check_h():
+                            obj_return(bariers, barier)
+                            return False
+                        else:
+                            return True
+            elif c_jump >= 1:
+                if user_y + user_HEIGHT - 5 >= barier.y:
+                    if barier.x <= user_x + user_WIDTH - 35 <= barier.x + barier.width:
+                        if check_h():
+                            obj_return(bariers, barier)
+                            return False
+                        else:
+                            return True
+                else:
+                    if user_y + user_HEIGHT - 10 >= barier.y:
+                        if barier.x <= user_x + 5 <= barier.x + barier.width:
+                            if check_h():
+                                obj_return(bariers, barier)
+                                return False
+                            else:
+                                return True
+
+
