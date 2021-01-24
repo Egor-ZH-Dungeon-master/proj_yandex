@@ -1,187 +1,419 @@
-import os
-import sys
 import pygame
+import random
+import os
+
+
 
 pygame.init()
-size = WIDTH, HEIGHT = 1000, 900
-screen = pygame.display.set_mode(size)
-FPS = 50
+# размеры игры
+WIDTH = 1000
+HEIGHT = 750
+
+# ограничение кадров
+fps = 100
 clock = pygame.time.Clock()
-all_sprites = pygame.sprite.Group()
-tiles_group = pygame.sprite.Group()
-player_group = pygame.sprite.Group()
-perehod = pygame.mixer.Sound('data/perehod.wav')
-pygame.display.set_caption("Подземелье лягушек")
 
-def terminate():
-    pygame.quit()
-    sys.exit()
+# создание дисплея
+display = pygame.display.set_mode((WIDTH, HEIGHT))
+
+# название игры
+pygame.display.set_caption("Лягуха прыгуха :)")
+pygame.mixer.music.load('data/fonpesn.mp3')
+pygame.mixer.music.set_volume(0.3)
+jumpzv = pygame.mixer.Sound('data/prig.wav')
+prizemzv = pygame.mixer.Sound('data/priz.wav')
+poterserd = pygame.mixer.Sound('data/serdmin.wav')
+proigral = pygame.mixer.Sound('data/proigral.wav')
+
+# иконка игры
+ikonka = pygame.image.load("data/lyag0.png")
+pygame.display.set_icon(ikonka)
+# кактусы
+cac_im = [pygame.image.load("data/Cactus0.png"), pygame.image.load("data/Cactus1.png"),
+          pygame.image.load("data/Cactus2.png")]
+cac_opt = [69, 573, 37, 534, 40, 544]
+
+# определение персонажа
+pers_im = [pygame.image.load("data/lyag2.png"), pygame.image.load("data/lyag1.png"),
+           pygame.image.load("data/lyag0.png")]
+im_counter = 0
+
+stone_im = [pygame.image.load("data/Stone0.png"), pygame.image.load("data/Stone1.png")]
+
+# облака
+cloud_im = [pygame.image.load("data/Cloud0.png"), pygame.image.load("data/Cloud1.png")]
+
+scores = 0
+max_score = 0
+max_cact = 0
+nad_cactus = False
+health = 3
+health_im = pygame.image.load('data/serd.png')
+health_im = pygame.transform.scale(health_im, (30, 30))
 
 
-def start_screen():
-    intro_text = ["Правила игры:",
-                  "",
-                  "",
-                  "",
-                  "Вам нужно собирать мух, для перехода на следующий уровень.",
-                  "Когда собирете определённое кол-во мух, вас перекидывает на следующий уровень,",
-                  "Последний уровень: убить Босса"
-                  "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "                                                                                                                           Создатели и помощники:",
-                  "                                                                                                                           Артем Степанов",
-                  "                                                                                                                           Егор Жижло",
-                  "                                                                                                                           Александр Маньшин(Граф.Дизайнер)"]
 
-    fon = pygame.transform.scale(load_image('nach.jpg'), (WIDTH, HEIGHT))
-    screen.blit(fon, (0, 0))
-    font = pygame.font.Font(None, 25)
-    text_coord = 50
-    for line in intro_text:
-        string_rendered = font.render(line, 1, pygame.Color('white'))
-        intro_rect = string_rendered.get_rect()
-        text_coord += 10
-        intro_rect.top = text_coord
-        intro_rect.x = 10
-        text_coord += intro_rect.height
-        screen.blit(string_rendered, intro_rect)
 
-    while True:
+class Object:
+    def __init__(self, x, y, width, image, speed):
+        self.x = x
+        self.y = y
+        self.width = width
+        self.image = image
+        self.speed = speed
+
+    def move(self):
+        if self.x >= -self.width:
+            display.blit(self.image, (self.x, self.y))
+            self.x -= self.speed
+            return True
+        else:
+
+            return False
+
+    def ret_self(self, rad, y, width, image):
+        self.x = rad
+        self.y = y
+        self.width = width
+        self.image = image
+
+        display.blit(self.image, (self.x, self.y))
+
+
+
+user_WIDTH = 50
+user_HEIGHT = 50
+
+# положение персонажа
+user_x = WIDTH // 4
+user_y = HEIGHT - user_HEIGHT - 126
+
+m_jump = False
+c_jump = 30
+
+# размеры препятствия
+cac_WIDTH = 20
+cac_HEIGHT = 80
+
+# положение препятствия
+cac_x = WIDTH - 40
+cac_y = HEIGHT - cac_HEIGHT - 80
+
+# сам игровой цикл
+def game_1():
+    global m_jump
+    pygame.mixer.music.play(-1)
+    game = True
+    cac_array = []
+    create_cac_arr(cac_array)
+    land = pygame.image.load("data/Land.png")
+
+    stone, cloud = open_r()
+
+    while game:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                terminate()
-            elif event.type == pygame.KEYDOWN or \
-                    event.type == pygame.MOUSEBUTTONDOWN:
-                pygame.mixer.Sound.play(perehod)
+                pygame.quit()
+                quit()
 
-                return  # начинаем игру
-        pygame.display.flip()
-        clock.tick(FPS)
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_SPACE] or keys[pygame.K_w] or keys[pygame.K_UP]:
+            m_jump = True
+
+        if keys[pygame.K_ESCAPE] or keys[pygame.K_PAUSE]:
+            pause()
+
+        if m_jump:
+            jump()
+
+        if check_colid(cac_array):
+            game = False
+
+        count_sc(cac_array)
+
+        display.blit(land, (0, 0))
+        p_text("Score: " + str(scores), 800, 10)
+        show_health()
 
 
-def load_image(name, color_key=None):
-    fullname = os.path.join('data', name)
-    if not os.path.isfile(fullname):
-        print(f'Файл с изображением \'{fullname}\' не найден')
-        sys.exit()
-    image = pygame.image.load(fullname)
+        draw_array(cac_array)
+        move_ob(stone, cloud)
 
-    if color_key:
-        image = image.convert()
-        if color_key == -1:
-            color_key = image.get_at((0, 0))
-        image.set_colorkey(color_key)
+        d_lyag()
+
+        pygame.display.update()
+        clock.tick(fps)
+    return u_game_over()
+
+
+def jump():
+    global user_y, m_jump, c_jump
+    if c_jump >= -30:
+        if c_jump == 30:
+            pygame.mixer.Sound.play(jumpzv)
+        if c_jump == -30:
+            pygame.mixer.Sound.play(prizemzv)
+        user_y -= c_jump / 2.5
+        c_jump -= 1
     else:
-        image = image.convert_alpha()
-    return image
+        c_jump = 30
+        m_jump = False
 
 
-def load_level(filename):
-    filename = "data/" + filename
-    # читаем уровень, убирая символы перевода строки
-    with open(filename, 'r') as mapFile:
-        level_map = [line.strip() for line in mapFile]
+def create_cac_arr(array):
+    choice = random.randrange(0, 3)
+    image = cac_im[choice]
+    width = cac_opt[choice * 2]
+    height = cac_opt[choice * 2 + 1]
+    array.append(Object(WIDTH + 50, height, width, image, 4))
 
-    # и подсчитываем максимальную длину
-    max_width = max(map(len, level_map))
+    choice = random.randrange(0, 3)
+    image = cac_im[choice]
+    width = cac_opt[choice * 2]
+    height = cac_opt[choice * 2 + 1]
+    array.append(Object(WIDTH + 300, height, width, image, 4))
 
-    # дополняем каждую строку пустыми клетками ('.')
-    return list(map(lambda x: x.ljust(max_width, '.'), level_map))
-
-
-def generate_level(level):
-    new_player, x, y = None, None, None
-    for y in range(len(level)):
-        for x in range(len(level[y])):
-            if level[y][x] == '.':
-                Tile('empty', x, y)
-            elif level[y][x] == '#':
-                Tile('wall', x, y)
-            elif level[y][x] == 'p':
-                Tile('muxa', x, y)
-            elif level[y][x] == '@':
-                Tile('empty', x, y)
-                new_player = Player(x, y)
-    return new_player, x, y
+    choice = random.randrange(0, 3)
+    image = cac_im[choice]
+    width = cac_opt[choice * 2]
+    height = cac_opt[choice * 2 + 1]
+    array.append(Object(WIDTH + 600, height, width, image, 4))
 
 
-tile_images = {
-    'wall': load_image('stena.png'),
-    'empty': load_image('pol.png'),
-    'muxa': load_image("mukha.png")
-}
+def find_rad(array):
+    maximum = max(array[0].x, array[1].x, array[2].x)
+    if maximum < WIDTH:
+        rad = WIDTH
+        if rad - maximum < 50:
+            rad += 250
+    else:
+        rad = maximum
 
-wall_img = pygame.image.load("data/stena.png")
+    choice = random.randrange(0, 5)
+    if choice == 0:
+        rad += random.randrange(10, 15)
+    else:
+        rad += random.randrange(200, 350)
 
-empty_img = pygame.image.load('data/pol.png')
-muxa_img = pygame.image.load('data/mukha.png')
-
-player_image = load_image('heros.png')
-
-tile_width = tile_height = 50
-
-
-def move_hero(hero, movement):
-    x, y = hero.pos
-
-    if movement == "up":
-        if y > 0 and level[y - 1][x] == "." or y > 0 and level[y - 1][x] == "p":
-            hero.move(x, y - 1)
-    elif movement == "down":
-        if y < level_y - 1 and level[y + 1][x] == "." or y < level_y - 1 and level[y + 1][x] == "p":
-            hero.move(x, y + 1)
-    elif movement == "left":
-        if x > 0 and level[y][x - 1] == "." or x > 0 and level[y][x - 1] == "p":
-            hero.move(x - 1, y)
-    elif movement == "right":
-        if x < level_x - 1 and level[y][x + 1] == "." or x < level_x - 1 and level[y][x + 1] == "p":
-            hero.move(x + 1, y)
+    return rad
 
 
+def draw_array(array):
+    for cactus in array:
+        check = cactus.move()
+        if not check:
+            rad = find_rad(array)
+            choice = random.randrange(0, 3)
+            image = cac_im[choice]
+            width = cac_opt[choice * 2]
+            height = cac_opt[choice * 2 + 1]
+
+            cactus.ret_self(rad, height, width, image)
+
+def obj_return(objects, obj):
+    rad = find_rad(objects)
+    choice = random.randrange(0, 3)
+    image = cac_im[choice]
+    width = cac_opt[choice * 2]
+    height = cac_opt[choice * 2 + 1]
+
+    obj.ret_self(rad, height, width, image)
+def open_r():
+    choice = random.randrange(0, 2)
+    im_s = stone_im[choice]
+
+    choice = random.randrange(0, 2)
+    im_c = cloud_im[choice]
+
+    stone = Object(WIDTH, HEIGHT - 80, 10, im_s, 5)
+    cloud = Object(WIDTH, 80, 73, im_c, 3)
+
+    return cloud, stone
 
 
-class Tile(pygame.sprite.Sprite):
-    def __init__(self, tile_type, pos_x, pos_y):
-        super().__init__(tiles_group, all_sprites)
-        self.image = tile_images[tile_type]
-        self.rect = self.image.get_rect().move(
-            tile_width * pos_x, tile_height * pos_y)
+def move_ob(stone, cloud):
+    check = stone.move()
+    if not check:
+        choice = random.randrange(0, 2)
+        im_s = stone_im[choice]
+        stone.ret_self(WIDTH, 700 + random.randrange(10, 60), stone.width, im_s)
+
+    check = cloud.move()
+    if not check:
+        choice = random.randrange(0, 2)
+        im_c = cloud_im[choice]
+        cloud.ret_self(WIDTH, random.randrange(10, 200), cloud.width, im_c)
 
 
-class Player(pygame.sprite.Sprite):
-    def __init__(self, pos_x, pos_y):
-        super().__init__(player_group, all_sprites)
-        self.image = player_image
-        self.rect = self.image.get_rect().move(
-            tile_width * pos_x + 15, tile_height * pos_y + 5)
-        self.pos = pos_x, pos_y
+def d_lyag():
+    global im_counter
+    if im_counter == 18:
+        im_counter = 0
 
-    def move(self, x, y):
-        self.pos = (x, y)
-        global pos
-        self.rect = self.image.get_rect().move(
-            tile_width * self.pos[0] + 15, tile_height * self.pos[1] + 5)
+    display.blit(pers_im[im_counter // 6], (user_x, user_y))
+    im_counter += 1
 
 
-if __name__ == '__main__':
-    start_screen()
-    player = None
-    level = load_level('map.txt')
-    player, level_x, level_y = generate_level(level)
+def p_text(soobsh, x, y, sh_color=(0, 250, 0), sh_type="data/shrift.ttf", sh_size=35):
+    sh_type = pygame.font.Font(sh_type, sh_size)
+    text = sh_type.render(soobsh, True, sh_color)
+    display.blit(text, (x, y))
 
-    while True:
+
+def pause():
+    paused = True
+    pygame.mixer.music.pause()
+    while paused:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                terminate()
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_RIGHT:
-                    move_hero(player, 'right')
-                if event.key == pygame.K_LEFT:
-                    move_hero(player, 'left')
-                if event.key == pygame.K_UP:
-                    move_hero(player, 'up')
-                if event.key == pygame.K_DOWN:
-                    move_hero(player, 'down')
-                screen.fill(pygame.Color('black'))
-        tiles_group.draw(screen)
-        player_group.draw(screen)
-        pygame.display.flip()
-        clock.tick(FPS)
+                pygame.quit()
+                quit()
+
+        p_text("ИГРА ОСТАНОВЛЕНА, ЧТОБЫ ПРОДОЛЖИТЬ НАЖМИ НА ENTER", 50, 300)
+
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_RETURN]:
+            paused = False
+
+        pygame.display.update()
+        clock.tick(20)
+    pygame.mixer.music.unpause()
+
+
+def check_colid(bariers):
+    for barier in bariers:
+        if barier.y == 449:
+            if not m_jump:
+                if barier.x <= user_x + user_WIDTH - 35 <= barier.x + barier.width:
+                    if check_h():
+                        obj_return(bariers, barier)
+                        return False
+                    else:
+                        return True
+            elif c_jump >= 0:
+                if user_y + user_HEIGHT - 5 >= barier.y:
+                    if barier.x <= user_x + user_WIDTH - 40 <= barier.x + barier.width:
+                        if check_h():
+                            obj_return(bariers, barier)
+                            return False
+                        else:
+                            return True
+            else:
+                if user_y + user_HEIGHT - 10 >= barier.y:
+                    if check_h():
+                        obj_return(bariers, barier)
+                        return False
+                    else:
+                        return True
+        else:
+            if not m_jump:
+                if barier.x <= user_x + user_WIDTH - 5 <= barier.x + barier.width:
+                    if check_h():
+                        obj_return(bariers, barier)
+                        return False
+                    else:
+                        return True
+            elif c_jump == 10:
+                if user_y + user_HEIGHT - 5 >= barier.y:
+                    if barier.x <= user_x + user_WIDTH - 5 <= barier.x + barier.width:
+                        if check_h():
+                            obj_return(bariers, barier)
+                            return False
+                        else:
+                            return True
+            elif c_jump >= 1:
+                if user_y + user_HEIGHT - 5 >= barier.y:
+                    if barier.x <= user_x + user_WIDTH - 35 <= barier.x + barier.width:
+                        if check_h():
+                            obj_return(bariers, barier)
+                            return False
+                        else:
+                            return True
+                else:
+                    if user_y + user_HEIGHT - 10 >= barier.y:
+                        if barier.x <= user_x + 5 <= barier.x + barier.width:
+                            if check_h():
+                                obj_return(bariers, barier)
+                                return False
+                            else:
+                                return True
+
+
+def count_sc(bar):
+    global scores, max_cact, max_score
+    nad_cactus = 0
+
+
+    if -20 <= c_jump < 25:
+        for barr in bar:
+            if user_y + user_HEIGHT - 5 <= barr.y:
+                if barr.x <= user_x <= barr.x + barr.width:
+                    nad_cactus += 1
+                elif barr.x <= user_x + user_WIDTH <= barr.x + barr.width:
+                    nad_cactus += 1
+
+        max_cact = max(max_cact, nad_cactus)
+    else:
+        if c_jump == -30:
+            scores += max_cact
+            max_cact = 0
+
+def u_game_over():
+    global scores, max_score
+    stopped = True
+    while stopped:
+        for event in pygame.event.get():
+            if event. type == pygame.QUIT:
+                pygame.quit()
+                quit()
+        if scores > max_score:
+            max_score = scores
+            p_text("Новый рекорд! Score: " + str(max_score), 300, 200)
+            p_text("ТЫ ПРОИГРАЛ, НИКЧЁМНЫЙ ЛЮДИШКА, Я НЕ УДИВЛЁН", 150, 300)
+        p_text("ТЫ ПРОИГРАЛ, НИКЧЁМНЫЙ ЛЮДИШКА, Я НЕ УДИВЛЁН", 150, 300)
+
+
+
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_RETURN] or keys[pygame.K_SPACE]:
+            return True
+
+        if keys[pygame.K_ESCAPE]:
+            return False
+
+        pygame.display.update()
+        clock.tick(60)
+
+
+def show_health():
+    global health
+    health1 = 0
+    x = 20
+    while health1 != health:
+        display.blit(health_im, (x, 20))
+        x += 40
+        health1 += 1
+
+
+def check_h():
+    global health
+    health -= 1
+    if health == 0:
+        pygame.mixer.Sound.play(proigral)
+        return False
+    else:
+        pygame.mixer.Sound.play(poterserd)
+        return True
+
+
+
+
+while game_1():
+    scores = 0
+    m_jump = False
+    c_jump = 30
+    user_y = HEIGHT - user_HEIGHT - 126
+    health = 3
+
+pygame.quit()
+quit()
