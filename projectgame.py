@@ -2,8 +2,6 @@ import pygame
 import random
 import os
 
-
-
 pygame.init()
 # размеры игры
 WIDTH = 1000
@@ -24,6 +22,7 @@ jumpzv = pygame.mixer.Sound('data/prig.wav')
 prizemzv = pygame.mixer.Sound('data/priz.wav')
 poterserd = pygame.mixer.Sound('data/serdmin.wav')
 proigral = pygame.mixer.Sound('data/proigral.wav')
+plusserd = pygame.mixer.Sound('data/plusserd.wav')
 
 # иконка игры
 ikonka = pygame.image.load("data/lyag0.png")
@@ -47,11 +46,9 @@ scores = 0
 max_score = 0
 max_cact = 0
 nad_cactus = False
-health = 3
+health = 2
 health_im = pygame.image.load('data/serd.png')
 health_im = pygame.transform.scale(health_im, (30, 30))
-
-
 
 
 class Object:
@@ -80,7 +77,6 @@ class Object:
         display.blit(self.image, (self.x, self.y))
 
 
-
 user_WIDTH = 50
 user_HEIGHT = 50
 
@@ -99,6 +95,7 @@ cac_HEIGHT = 80
 cac_x = WIDTH - 40
 cac_y = HEIGHT - cac_HEIGHT - 80
 
+
 # сам игровой цикл
 def game_1():
     global m_jump
@@ -109,6 +106,7 @@ def game_1():
     land = pygame.image.load("data/Land.png")
 
     stone, cloud = open_r()
+    heart = Object(WIDTH, 450, 30, health_im, 4)
 
     while game:
         for event in pygame.event.get():
@@ -133,8 +131,9 @@ def game_1():
 
         display.blit(land, (0, 0))
         p_text("Score: " + str(scores), 800, 10)
+        heart.move()
+        plus_h(heart)
         show_health()
-
 
         draw_array(cac_array)
         move_ob(stone, cloud)
@@ -210,6 +209,7 @@ def draw_array(array):
 
             cactus.ret_self(rad, height, width, image)
 
+
 def obj_return(objects, obj):
     rad = find_rad(objects)
     choice = random.randrange(0, 3)
@@ -218,6 +218,8 @@ def obj_return(objects, obj):
     height = cac_opt[choice * 2 + 1]
 
     obj.ret_self(rad, height, width, image)
+
+
 def open_r():
     choice = random.randrange(0, 2)
     im_s = stone_im[choice]
@@ -343,7 +345,6 @@ def count_sc(bar):
     global scores, max_cact, max_score
     nad_cactus = 0
 
-
     if -20 <= c_jump < 25:
         for barr in bar:
             if user_y + user_HEIGHT - 5 <= barr.y:
@@ -358,12 +359,13 @@ def count_sc(bar):
             scores += max_cact
             max_cact = 0
 
+
 def u_game_over():
     global scores, max_score
     stopped = True
     while stopped:
         for event in pygame.event.get():
-            if event. type == pygame.QUIT:
+            if event.type == pygame.QUIT:
                 pygame.quit()
                 quit()
         if scores > max_score:
@@ -371,8 +373,6 @@ def u_game_over():
             p_text("Новый рекорд! Score: " + str(max_score), 300, 200)
             p_text("ТЫ ПРОИГРАЛ, НИКЧЁМНЫЙ ЛЮДИШКА, Я НЕ УДИВЛЁН", 150, 300)
         p_text("ТЫ ПРОИГРАЛ, НИКЧЁМНЫЙ ЛЮДИШКА, Я НЕ УДИВЛЁН", 150, 300)
-
-
 
         keys = pygame.key.get_pressed()
         if keys[pygame.K_RETURN] or keys[pygame.K_SPACE]:
@@ -406,6 +406,16 @@ def check_h():
         return True
 
 
+def plus_h(heart):
+    global health, user_y, user_x, user_WIDTH, user_HEIGHT
+    if user_x <= heart.x <= user_x + user_HEIGHT:
+        if user_y <= heart.y <= user_y + user_HEIGHT:
+            pygame.mixer.Sound.play(plusserd)
+            if health < 4:
+                health += 1
+
+        radius = WIDTH + random.randrange(500, 1700)
+        heart.ret_self(radius, heart.y, heart.width, heart.image)
 
 
 while game_1():
@@ -413,7 +423,7 @@ while game_1():
     m_jump = False
     c_jump = 30
     user_y = HEIGHT - user_HEIGHT - 126
-    health = 3
+    health = 2
 
 pygame.quit()
 quit()
