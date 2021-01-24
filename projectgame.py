@@ -119,7 +119,7 @@ class Button:
         self.active_clr = (0, 200, 0)
         self.noactive_clr = (0, 100, 0)
 
-    def draw(self, x, y, message, action=None, fon_size=30):
+    def draw(self, x, y, message, action=None):
         mouse = pygame.mouse.get_pos()
         clicknul = pygame.mouse.get_pressed()
 
