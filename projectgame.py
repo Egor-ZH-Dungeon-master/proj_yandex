@@ -2,26 +2,30 @@ import pygame
 import random
 import os
 
-
 pygame.init()
 
 WIDTH = 1000
 HEIGHT = 750
 
+
 fps = 100
 clock = pygame.time.Clock()
 
+
 display = pygame.display.set_mode((WIDTH, HEIGHT))
+
 
 pygame.display.set_caption("Лягуха прыгуха :)")
 pygame.mixer.music.load('data/fonpesn.mp3')
 pygame.mixer.music.set_volume(0.3)
-jumpzv = pygame.mixer.Sound('data/prig.wav')
-prizemzv = pygame.mixer.Sound('data/priz.wav')
-poterserd = pygame.mixer.Sound('data/serdmin.wav')
-proigral = pygame.mixer.Sound('data/proigral.wav')
-plusserd = pygame.mixer.Sound('data/plusserd.wav')
-click = pygame.mixer.Sound('data/click.wav')
+
+
+# jumpzv = pygame.mixer.Sound('data/prig.wav')
+# prizemzv = pygame.mixer.Sound('data/priz.wav')
+# poterserd = pygame.mixer.Sound('data/serdmin.wav')
+# proigral = pygame.mixer.Sound('data/proigral.wav')
+# plusserd = pygame.mixer.Sound('data/plusserd.wav')
+# click = pygame.mixer.Sound('data/click.wav')
 
 
 ikonka = pygame.image.load("data/lyag0.png")
@@ -33,16 +37,14 @@ cac_im = [pygame.image.load("data/Cactus0.png"), pygame.image.load("data/Cactus1
 cac_opt = [69, 573, 37, 534, 40, 544]
 
 
+
 pers_im = [pygame.image.load("data/lyag2.png"), pygame.image.load("data/lyag1.png"),
            pygame.image.load("data/lyag0.png")]
 im_counter = 0
 
-
 stone_im = [pygame.image.load("data/Stone0.png"), pygame.image.load("data/Stone1.png")]
 
-
 cloud_im = [pygame.image.load("data/Cloud0.png"), pygame.image.load("data/Cloud1.png")]
-
 
 scores = 0
 max_score = 0
@@ -126,7 +128,7 @@ class Button:
         if x < mouse[0] < x + self.width and y < mouse[1] < y + self.height:
             pygame.draw.rect(display, self.active_clr, (x, y, self.width, self.height))
             if clicknul[0] == 1:
-                pygame.mixer.Sound.play(click)
+                # pygame.mixer.Sound.play(click)
                 pygame.time.delay(300)
                 if action is not None:
                     action()
@@ -206,9 +208,11 @@ def jump():
     global user_y, m_jump, c_jump
     if c_jump >= -30:
         if c_jump == 30:
-            pygame.mixer.Sound.play(jumpzv)
+            pass
+        # pygame.mixer.Sound.play(jumpzv)
         if c_jump == -30:
-            pygame.mixer.Sound.play(prizemzv)
+            pass
+        # pygame.mixer.Sound.play(prizemzv)
         user_y -= c_jump / 2.5
         c_jump -= 1
     else:
@@ -456,10 +460,10 @@ def check_h():
     global health
     health -= 1
     if health == 0:
-        pygame.mixer.Sound.play(proigral)
+        # pygame.mixer.Sound.play(proigral)
         return False
     else:
-        pygame.mixer.Sound.play(poterserd)
+        # pygame.mixer.Sound.play(poterserd)
         return True
 
 
@@ -467,7 +471,8 @@ def plus_h(heart):
     global health, user_y, user_x, user_WIDTH, user_HEIGHT
     if user_x <= heart.x <= user_x + user_HEIGHT:
         if user_y <= heart.y <= user_y + user_HEIGHT:
-            pygame.mixer.Sound.play(plusserd)
+            pass
+            # pygame.mixer.Sound.play(plusserd)
             if health < 4:
                 health += 1
 
@@ -477,6 +482,7 @@ def plus_h(heart):
 
 s_men()
 
+
 while game_1():
     scores = 0
     m_jump = False
@@ -484,6 +490,11 @@ while game_1():
     user_y = HEIGHT - user_HEIGHT - 126
     health = 2
 
-pygame.quit()
-quit()
 
+running = True
+
+while running:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+pygame.quit()
